@@ -1,0 +1,10 @@
+
+Esto se a¿hace de manera local:
+
+git init..inicializamos el repo
+git add . agregamos branch
+git commit -m "comentariocon cambio"
+
+Despues vamos a github y seguimos los pasos para crear repositotoio remoto
+git remote add origin git@github.com:M471459/estado-esuti.git para conectar ambos
+git push -u origin main para que los cambios que hicimos local los pushee al remoto
