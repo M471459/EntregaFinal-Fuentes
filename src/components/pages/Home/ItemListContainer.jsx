@@ -1,39 +1,61 @@
 import React from "react";
+import { BeatLoader } from "react-spinners";
 import { useState, useEffect } from "react";
 import { products } from "../../../productsMock.js";
 import ItemList from "../Home/ItemList.jsx";
 import { useParams, useNavigate } from "react-router-dom";
-import { Category } from "@mui/icons-material";
+import { db } from "../../../firebaseConfig.js";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { Skeleton } from "@mui/material";
 
 const ItemListContainer = () => {
-  const navitage = useNavigate();
   const { name } = useParams();
   const { sport } = useParams();
   const [items, setItems] = useState([]);
   const [error, setError] = useState(null);
-  console.log(sport);
-  console.log(name);
 
   useEffect(() => {
-    let productsFiltered = "";
+    const productsCollection = collection(db, "products");
 
-    name !== undefined
-      ? (productsFiltered = products.filter((product) => product[name] === 1))
-      : (productsFiltered = products.filter(
-          (product) => product.category === sport
-        ));
+    let consulta = productsCollection;
 
-    const getProducts = new Promise((resolve, reject) => {
-      let x = true;
-      if (x) {
-        resolve(name || sport ? productsFiltered : products);
-      } else {
-        reject({ status: 400, message: "no estás autorizado" });
-      }
+    if (name) {
+      consulta = query(productsCollection, where(name, "==", true));
+    } else if (sport) {
+      consulta = query(productsCollection, where("category", "==", sport));
+    }
+
+    getDocs(consulta).then((res) => {
+      let newArray = res.docs.map((doc) => {
+        return { id: doc.id, ...doc.data() };
+      });
+      setItems(newArray);
     });
-    getProducts.then((res) => setItems(res)).catch((error) => setError(error));
-  }, [name, sport]);
+  }, [sport, name]);
 
-  return <ItemList items={items} error={error} />;
+  const addDocProducts = () => {
+    let productsCollection = collection(db, "products");
+    products.forEach((product) => addDoc(productsCollection, product));
+  };
+
+  if (items.length === 0) {
+    return (
+      <div>
+        <Skeleton
+          variant="rectangular"
+          height={200}
+          sx={{ fontsize: "10rem" }}
+          color="#36d7b7"
+        />
+        ;
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <ItemList items={items} error={error} />
+    </>
+  );
 };
 export default ItemListContainer;
