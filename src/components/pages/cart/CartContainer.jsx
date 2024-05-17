@@ -3,7 +3,7 @@ import Cart from "./Cart";
 import { CartContext } from "../../../context/CartContext";
 const CartContainer = () => {
   const { cart, clearCart, deleteProduct, getTotal } = useContext(CartContext);
-  let total = getTotal();
+  let total = parseFloat(getTotal().toFixed(2));
   return (
     <Cart
       cart={cart}
